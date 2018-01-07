@@ -24,21 +24,21 @@ function init() {
 
   // Attractorを生成
   const attractor = new attractors['Rossler']();
-  
+  const { fov, cameraPos, initXYZ } = attractor;
+
   // カメラを作成
-  const camera = new THREE.PerspectiveCamera(attractor.fov, width / height, 1, 100000);
-  camera.position.set(0, 0, attractor.cameraPos);
+  const camera = new THREE.PerspectiveCamera(fov, width / height, 1, 100000);
+  camera.position.set(0, 0, cameraPos);
  
   // main
   const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
   const geometry = new THREE.Geometry();
-  R.range(0, 50000).reduce((acc, i) => {
-    const inputXYZ = R.last(acc) as XYZ;
+  R.range(0, 50000).reduce(inputXYZ => {
     const xyz = rK(inputXYZ, attractor);
     const [x, y, z] = xyz;
     geometry.vertices.push(new THREE.Vector3(x, y, z));
-    return acc.concat([xyz]);
-  }, [attractor.initXYZ]);
+    return xyz;
+  }, initXYZ);
 
   const line = new THREE.Line(geometry, material);
   // シーンに追加
