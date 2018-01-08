@@ -42,7 +42,13 @@ gulp.task('webpack', function () {
 });
 
 gulp.task('http-server', () => {
-  const httpServer = child.spawn('http-server.cmd', ['./dist', '-p 80']);
+  const platform = require('os').platform();
+  let httpServer;
+  if (platform === 'win32') {
+    httpServer = child.spawn('http-server.cmd', ['./dist', '-p 80']);
+  } else {
+    httpServer = child.spawn('http-server', ['./dist']);
+  }
   httpServer.stdout.on('data', (data) => {
     console.log(String(data));
   });
