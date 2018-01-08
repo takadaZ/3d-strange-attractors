@@ -22,7 +22,7 @@ export function rK(xyz: XYZ, { diff, dt }: IAttractor) {
     const [diffX, diffY, diffZ] = R.last(acc) as XYZ;
     const input = [fun(x, diffX, dt), fun(y, diffY, dt), fun(z, diffZ, dt)] as XYZ;
     return acc.concat([diff(input)]);
-  }, [xyz] as XYZ[]);
+  }, [xyz]);
 
   return xyz.map((_, i) => getRKResult(diffs, i, dt)) as XYZ;
 }

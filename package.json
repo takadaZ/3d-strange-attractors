@@ -24,6 +24,7 @@
     "ramda": "^0.25.0",
     "three": "^0.89.0",
     "ts-node": "^4.1.0",
-    "typescript": "^2.6.2"
+    "typescript": "^2.6.2",
+    "webpack-stream": "^4.0.0"
   }
 }

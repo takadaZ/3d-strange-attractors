@@ -1,7 +1,7 @@
 import * as child from 'child_process';
 import * as gulp from 'gulp';
 import * as ts from 'gulp-typescript';
-import * as webpack from 'gulp-webpack';
+import * as webpack from 'webpack-stream';
 
 const webpackConfig = require('./webpack.config.js');
 
@@ -33,7 +33,7 @@ function srcToDist() {
 function webPack(name: string) {
   return gulp
     .src([`./js/${name}/*.js`])
-    .pipe(webpack(webpackConfig))
+    .pipe(webpack(require('./webpack.config.js')))
     .pipe(gulp.dest(`./dist/${name}`));
 }
 
