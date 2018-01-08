@@ -2,9 +2,19 @@
 <html>
 <head>
   <meta charset="UTF-8" />
+  <link href="style.css" rel="stylesheet">
 </head>
 <body>
-  <canvas id="myCanvas"></canvas>
+  <div id="settings">
+    <h1>3D Attractor Modeling</h1>
+    <div>
+      <label>Select attractor: <select id="selectName"></select></label>
+    </div>
+    <div>
+      <button id="done">Done</button>
+    </div>
+  </div>
+  <canvas id="canvas"></canvas>
   <script src="bundle.js"></script>
 </body>
 </html>

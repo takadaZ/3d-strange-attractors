@@ -12,8 +12,8 @@ const diffArgFuns: DiffArgFun[] = [
   diffArgFun(1),
 ];
 
-function getRKResult(diffs: XYZ[], col: number, dt: number) {
-  return diffs[0][col] + (diffs[1][col] + 2 * diffs[2][col] + 2 * diffs[3][col] + diffs[4][col]) * dt / 6;
+function getRKResult(diffs: XYZ[], i: number, dt: number) {
+  return diffs[0][i] + (diffs[1][i] + 2 * diffs[2][i] + 2 * diffs[3][i] + diffs[4][i]) * dt / 6;
 }
 
 export function rK(xyz: XYZ, { diff, dt }: IAttractor) {

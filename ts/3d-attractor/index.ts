@@ -1,68 +1,38 @@
-import * as attractors from './attractors';
-import { rK } from './runge-kutta';
-import * as R from 'ramda';
-import * as THREE from 'three';
+import { attractors } from './attractors';
+import { render } from './render';
 
 window.addEventListener('DOMContentLoaded', init);
 
-function init() {
+function createSelectOption(name: string) {
+  const elOption = document.createElement('option');
+  elOption.value = name;
+  elOption.text = name;
+  return elOption;
+}
 
-  const width = 1600;
-  const height = 900;
-
-  const canvas = document.querySelector('#myCanvas') as HTMLCanvasElement;
-
-  // レンダラーを作成
-  const renderer = new THREE.WebGLRenderer({
-    canvas
+function createSelectName() {
+  const elSelectName = getSelectName();
+  Object.keys(attractors).forEach(key => {
+    elSelectName.appendChild(createSelectOption(key));
   });
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(width, height);
- 
-  // シーンを作成
-  const scene = new THREE.Scene();
+}
 
-  // Attractorを生成
-  const attractor = new attractors['Rossler']();
-  const { fov, cameraPos, initXYZ } = attractor;
+function getSelectName() {
+  return document.querySelector('#selectName') as HTMLSelectElement;
+}
 
-  // カメラを作成
-  const camera = new THREE.PerspectiveCamera(fov, width / height, 1, 100000);
-  camera.position.set(0, 0, cameraPos);
- 
-  // main
-  const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
-  const geometry = new THREE.Geometry();
-  R.range(0, 50000).reduce(inputXYZ => {
-    const xyz = rK(inputXYZ, attractor);
-    const [x, y, z] = xyz;
-    geometry.vertices.push(new THREE.Vector3(x, y, z));
-    return xyz;
-  }, initXYZ);
+function setDisplayElement(displayState: string, selector: string) {
+  const el = document.querySelector(selector) as HTMLElement;
+  el.style.display = displayState;
+}
 
-  const line = new THREE.Line(geometry, material);
-  // シーンに追加
-  scene.add(line);
-
-  // 平行光源
-  const light = new THREE.DirectionalLight(0xFFFFFF);
-  light.intensity = 2; // 光の強さを倍に
-  light.position.set(1, 1, 1);
-
-  // シーンに追加
-  scene.add(light);
- 
-  // 初回実行
-  tick();
- 
-  function tick() {
-    requestAnimationFrame(tick);
- 
-    // 箱を回転させる
-    line.rotation.x += 0.01;
-    line.rotation.y += 0.01;
- 
-    // レンダリング
-    renderer.render(scene, camera);
-  }
+function init() {
+  const elButtonDone = document.querySelector('#done') as HTMLButtonElement;
+  elButtonDone.addEventListener('click', _ => {
+    const attractor = getSelectName().value;
+    setDisplayElement('none', '#settings');
+    setDisplayElement('block', '#canvas');
+    render(attractor);
+  });
+  createSelectName();
 }
