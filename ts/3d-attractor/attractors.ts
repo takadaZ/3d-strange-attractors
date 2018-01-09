@@ -11,6 +11,7 @@ declare global {
     fov: number;
     cameraPos: number;
     dt: number;
+    recursion?: number;
     diff: Diff;
   }
 }
@@ -205,6 +206,50 @@ export const attractors: Attractors = {
   //   }
   // },
 
+  Chua: class implements IAttractor {
+    a = 15.6;
+    b = 28;
+    c = 0;
+    d = - 1.143;
+    e = - 0.714;
+    initXYZ = [0.7, 0, 0] as XYZ;
+    fov = 5;
+    cameraPos = 50;
+    dt = 0.005;
+    diff = ([inputX, inputY, inputZ]: XYZ) => {
+      const { a, b, c, d, e } = this;
+      const g = e * inputX + (d - e) * (Math.abs(inputX + 1) - Math.abs(inputX - 1)) / 2;
+      const x = a * (inputY - inputX - g);
+      const y = inputX - inputY + inputZ;
+      const z = - b * inputY - c * inputZ;
+      return [x, y, z] as XYZ;
+    }
+  },
+  
+  Pickover: class implements IAttractor {
+    a = 2.24;
+    b = 0.43;
+    c = - 0.65;
+    d = - 2.43;
+    // a = 1;
+    // b = 1.8;
+    // c = 0.71;
+    // d = 1.51;
+    e = 1;
+    initXYZ = [1.1, 1.0, 1.0] as XYZ;
+    fov = 5;
+    cameraPos = 10000;
+    dt = 0.005;
+    recursion = 150000;
+    diff = ([inputX, inputY, inputZ]: XYZ) => {
+      const { a, b, c, d, e } = this;
+      const x = Math.sin(a * inputX) - inputZ * Math.cos(b * inputY);
+      const y = inputZ * Math.sin(c * inputX) - Math.cos(d * inputY);
+      const z = e / Math.sin(inputX);
+      return [x, y, z] as XYZ;
+    }
+  },
+  
   // Template
   /*
   : class implements IAttractor {

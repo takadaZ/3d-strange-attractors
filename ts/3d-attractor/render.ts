@@ -33,7 +33,7 @@ export function render(
   // main
   const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
   const geometry = new THREE.Geometry();
-  R.range(0, recursion).reduce(inputXYZ => {
+  R.range(0, attractor.recursion || recursion).reduce(inputXYZ => {
     const xyz = rK(inputXYZ, attractor);
     const [x, y, z] = xyz;
     geometry.vertices.push(new THREE.Vector3(x, y, z));
