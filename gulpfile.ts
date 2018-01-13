@@ -9,7 +9,10 @@ const apps = ['3d-attractor'];
 
 gulp.task('default', ['tsc'], () => {
   srcToDist();
-  apps.forEach(name => webPack(name));
+  apps.forEach(name => {
+    bootstrap(name);
+    webPack(name);
+  });
 });
 
 gulp.task('tsc', () => {
@@ -28,6 +31,12 @@ function srcToDist() {
   return gulp
     .src('src/**/*')
     .pipe(gulp.dest('dist'));
+}
+
+function bootstrap(name: string) {
+  return gulp
+    .src('bootstrap/dist/css/*.min.css')
+    .pipe(gulp.dest(`dist/${name}/bootstrap/css`));
 }
 
 function webPack(name: string) {

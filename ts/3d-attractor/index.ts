@@ -1,7 +1,15 @@
 import { attractors } from './attractors';
-import { render } from './render';
+import { render, disposeGL } from './render';
+import { view } from 'ramda';
+import { win32 } from 'path';
 
-window.addEventListener('DOMContentLoaded', init);
+function getByCss(selector: string) {
+  return document.querySelector(selector) as HTMLElement;
+}
+
+function setEvents(selector: string, ...events: [string, EventListener][]) {
+  events.forEach(([eventType, listener]) => getByCss(selector).addEventListener(eventType, listener));
+}
 
 function createSelectOption(name: string) {
   const elOption = document.createElement('option');
@@ -12,27 +20,71 @@ function createSelectOption(name: string) {
 
 function createSelectName() {
   const elSelectName = getSelectName();
-  Object.keys(attractors).forEach(key => {
-    elSelectName.appendChild(createSelectOption(key));
-  });
+  Object.keys(attractors).map(key => elSelectName.appendChild(createSelectOption(key)));
 }
 
 function getSelectName() {
-  return document.querySelector('#selectName') as HTMLSelectElement;
+  return getByCss('#selectName') as HTMLSelectElement;
 }
 
-function setDisplayElement(displayState: string, selector: string) {
-  const el = document.querySelector(selector) as HTMLElement;
-  el.style.display = displayState;
+function setDisplayElements(displayState: string, ...selectors: string[]) {
+  selectors.forEach(selector => getByCss(selector).style.display = displayState);
+}
+
+function resetRenderer() {
+  const attractor = getSelectName().value;
+  const canvas = getByCss('#canvas');
+  disposeGL(canvas);
+  render(canvas, attractor, document.body.clientWidth, document.body.clientHeight);
 }
 
 function init() {
-  const elButtonDone = document.querySelector('#done') as HTMLButtonElement;
-  elButtonDone.addEventListener('click', _ => {
-    const attractor = getSelectName().value;
-    setDisplayElement('none', '#settings');
-    setDisplayElement('block', '#canvas');
-    render(attractor);
-  });
+  setEvents('#done',
+    ['click', _ => {
+      setDisplayElements('none', '#settings');
+      setDisplayElements('block', '#canvas', '#ope-icons');
+      resetRenderer();
+    }]
+  );
+  setEvents('#canvas',
+    ['mousemove', _ => {
+      function hideEl() {
+        switchStyle('3s', '0', 'hidden', '-100px');
+      }
+      function switchStyle(delay: string, opacity: string, visibility: string, top: string) {
+        const opeIcons = getByCss('#ope-icons');
+        const transitionend = 'transitionend';
+        opeIcons.removeEventListener(transitionend, hideEl);
+        if (visibility = 'visible') {
+          opeIcons.addEventListener(transitionend, hideEl);
+        }
+        opeIcons.style.transitionDelay = delay;
+        opeIcons.style.opacity = opacity;
+        opeIcons.style.visibility = visibility; 
+        opeIcons.style.top = top;     
+      }
+      switchStyle('0.1s', '1', 'visible', '0');
+    }]
+  );
+  setEvents('.arrow_back',
+    ['click', _ => {
+      setDisplayElements('block', '#settings');
+      setDisplayElements('none', '#canvas', '#ope-icons');
+      disposeGL(getByCss('#canvas'));
+    }]
+  );
+  setEvents('.fullscreen',
+    ['click', _ => {
+      const canvas = getByCss('#canvas') as HTMLDivElement | any;
+      if (canvas.webkitRequestFullScreen) {
+        canvas.webkitRequestFullScreen();
+      } else {
+        canvas.mozRequestFullScreen();
+      }
+    }]);
+
   createSelectName();
 }
+
+window.addEventListener('resize', resetRenderer)
+window.addEventListener('DOMContentLoaded', init);

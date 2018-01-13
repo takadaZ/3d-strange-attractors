@@ -3,22 +3,47 @@ import { rK } from './runge-kutta';
 import * as R from 'ramda';
 import * as THREE from 'three';
 
+export function disposeGL(canvas: HTMLElement) {
+  (Array.from(canvas.children) as HTMLCanvasElement[]).forEach(child => {
+    const gl = child.getContext('webgl') as WebGLRenderingContext;
+    const numTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+    for (let unit = 0; unit < numTextureUnits; ++unit) {
+      gl.activeTexture(gl.TEXTURE0 + unit);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    const numAttributes = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+    for (let attrib = 0; attrib < numAttributes; ++attrib) {
+      gl.vertexAttribPointer(attrib, 1, gl.FLOAT, false, 0, 0);
+    }
+    gl.canvas.width = 1;
+    gl.canvas.height = 1;
+    canvas.removeChild(child);
+  });
+}
+
 export function render(
+  canvas: HTMLElement,
   name = 'Lorenz',
   width = 960,
   height = 640,
   recursion = 50000,
 ) {
 
-  const canvas = document.querySelector('#canvas') as HTMLCanvasElement;
+  const renderer = new THREE.WebGLRenderer();
 
   // レンダラーを作成
-  const renderer = new THREE.WebGLRenderer({
-    canvas
-  });
+  renderer.autoClear = true;
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(width, height);
- 
+  canvas.appendChild(renderer.domElement);
+
   // シーンを作成
   const scene = new THREE.Scene();
 
