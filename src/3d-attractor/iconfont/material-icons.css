@@ -2,11 +2,12 @@
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
+  src: url(MaterialIcons-Regular.eot); /* For IE6-8 */
   src: local('Material Icons'),
-    local('MaterialIcons-Regular'),
-    url(iconfont/MaterialIcons-Regular.woff2) format('woff2'),
-    url(iconfont/MaterialIcons-Regular.woff) format('woff'),
-    url(iconfont/MaterialIcons-Regular.ttf) format('truetype');
+       local('MaterialIcons-Regular'),
+       url(MaterialIcons-Regular.woff2) format('woff2'),
+       url(MaterialIcons-Regular.woff) format('woff'),
+       url(MaterialIcons-Regular.ttf) format('truetype');
 }
 
 .material-icons {
@@ -32,38 +33,4 @@
 
   /* Support for IE. */
   font-feature-settings: 'liga';
-}
-
-html, body {
-  height: 100%;
-  overflow: hidden;
-}
-
-h1 {
-  font-size: 1.5em;
-}
-
-#settings {
-  padding: 10px;
-}
-
-#canvas {
-  display: none;
-}
-
-#ope-icons {
-  padding: 10px;
-  position: absolute;
-  top: 0;
-  color: #999;
-  visibility: hidden;
-  opacity: 0;
-}
-
-#ope-icons i {
-  cursor: pointer;
-}
-
-#ope-icons i:hover {
-  color: #fff;
 }
