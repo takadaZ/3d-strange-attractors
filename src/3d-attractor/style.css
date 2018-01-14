@@ -39,10 +39,6 @@ html, body {
   overflow: hidden;
 }
 
-h1 {
-  font-size: 1.5em;
-}
-
 #settings {
   padding: 10px;
 }
@@ -53,6 +49,7 @@ h1 {
 
 #ope-icons {
   padding: 10px;
+  width: 100%;
   position: absolute;
   top: 0;
   color: #999;
@@ -62,8 +59,20 @@ h1 {
 
 #ope-icons i {
   cursor: pointer;
+  font-size: 48px;
 }
 
 #ope-icons i:hover {
   color: #fff;
+  visibility: visible;
+  opacity: 1;
+  top: 0;
+}
+
+.fullscreen,.play_arrow,.pause {
+  float: right;
+}
+
+.play_arrow {
+  display: none;
 }

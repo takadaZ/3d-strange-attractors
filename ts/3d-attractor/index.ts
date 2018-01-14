@@ -1,6 +1,6 @@
 import { attractors } from './attractors';
 import { render, disposeGL } from './render';
-import { view } from 'ramda';
+import { view, scan } from 'ramda';
 import { win32 } from 'path';
 
 function getByCss(selector: string) {
@@ -31,12 +31,33 @@ function setDisplayElements(displayState: string, ...selectors: string[]) {
   selectors.forEach(selector => getByCss(selector).style.display = displayState);
 }
 
+const glState: GLState | any = {
+  gl: null,
+  animate: true,
+};
+
 function resetRenderer() {
   const attractor = getSelectName().value;
   const canvas = getByCss('#canvas');
   disposeGL(canvas);
-  render(canvas, attractor, document.body.clientWidth, document.body.clientHeight);
+  glState.gl = render(canvas, attractor, document.body.clientWidth, document.body.clientHeight);
+  tick(glState)();
 }
+
+function tick(state: GLState) {
+  return () => {
+    const { renderer, scene, camera, line } = state.gl;
+    if (state.animate) { 
+      requestAnimationFrame(tick(state));
+      // 箱を回転させる
+      line.rotation.x += 0.01;
+      line.rotation.y += 0.01;
+    }
+    // レンダリング
+    renderer.render(scene, camera);
+  }
+}
+
 
 function init() {
   setEvents('#done',
@@ -82,6 +103,21 @@ function init() {
         canvas.mozRequestFullScreen();
       }
     }]);
+  setEvents('.pause',
+    ['click', _ => {
+      glState.animate = false;
+      setDisplayElements('none', '.pause');
+      setDisplayElements('block', '.play_arrow');
+    }]
+  );
+  setEvents('.play_arrow',
+    ['click', _ => {
+      glState.animate = true;
+      setDisplayElements('block', '.pause');
+      setDisplayElements('none', '.play_arrow');
+      tick(glState)();
+    }]
+  );
 
   createSelectName();
 }

@@ -28,13 +28,26 @@ export function disposeGL(canvas: HTMLElement) {
   });
 }
 
+declare global {
+  interface GL {
+    renderer: THREE.WebGLRenderer,
+    scene: THREE.Scene,
+    camera: THREE.PerspectiveCamera,
+    line: THREE.Line
+  }
+  interface GLState {
+    gl: GL,
+    animate: boolean
+  }
+}
+
 export function render(
   canvas: HTMLElement,
   name = 'Lorenz',
   width = 960,
   height = 640,
   recursion = 50000,
-) {
+): GL {
 
   const renderer = new THREE.WebGLRenderer();
 
@@ -76,18 +89,11 @@ export function render(
 
   // シーンに追加
   scene.add(light);
- 
-  // 初回実行
-  tick();
- 
-  function tick() {
-    requestAnimationFrame(tick);
- 
-    // 箱を回転させる
-    line.rotation.x += 0.01;
-    line.rotation.y += 0.01;
- 
-    // レンダリング
-    renderer.render(scene, camera);
-  }
+
+  return {
+    renderer,
+    scene,
+    camera,
+    line
+  };
 }
