@@ -9,6 +9,12 @@
     url(iconfont/MaterialIcons-Regular.ttf) format('truetype');
 }
 
+@keyframes fade-in-out {
+  0% {visibility: visible; opacity: 1;}
+  99% {visibility: visible; opacity: 1;}
+  100% {visibility: hidden; opacity: 0;}
+}
+
 .material-icons {
   font-family: 'Material Icons';
   font-weight: normal;
@@ -52,27 +58,28 @@ html, body {
   width: 100%;
   position: absolute;
   top: 0;
-  color: #999;
-  visibility: hidden;
-  opacity: 0;
 }
 
 #ope-icons i {
+  color: #888;
   cursor: pointer;
   font-size: 48px;
+  visibility: hidden;
+  opacity: 0;
 }
 
 #ope-icons i:hover {
   color: #fff;
   visibility: visible;
   opacity: 1;
-  top: 0;
 }
 
 .fullscreen,.play_arrow,.pause {
   float: right;
+  display: none;
 }
 
-.play_arrow {
+.arrow_back {
+  float: left;
   display: none;
 }

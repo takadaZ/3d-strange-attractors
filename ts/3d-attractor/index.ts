@@ -2,13 +2,20 @@ import { attractors } from './attractors';
 import { render, disposeGL } from './render';
 import { view, scan } from 'ramda';
 import { win32 } from 'path';
+import { AnimationAction } from 'three';
 
 function getByCss(selector: string) {
   return document.querySelector(selector) as HTMLElement;
 }
 
+function getsByCss(selector: string) {
+  return Array.from(document.querySelectorAll(selector)) as HTMLElement[];
+}
+
 function setEvents(selector: string, ...events: [string, EventListener][]) {
-  events.forEach(([eventType, listener]) => getByCss(selector).addEventListener(eventType, listener));
+  getsByCss(selector).forEach(el => {
+    events.forEach(([eventType, listener]) => el.addEventListener(eventType, listener));
+  });
 }
 
 function createSelectOption(name: string) {
@@ -27,70 +34,81 @@ function getSelectName() {
   return getByCss('#selectName') as HTMLSelectElement;
 }
 
-function setDisplayElements(displayState: string, ...selectors: string[]) {
-  selectors.forEach(selector => getByCss(selector).style.display = displayState);
+function setDisplay(displayState: string, selector: string) {
+  getsByCss(selector).forEach(el => el.style.display = displayState);
 }
 
-const glState: GLState | any = {
-  gl: null,
-  animate: true,
-};
+interface Animation {
+  enabled: boolean,
+  handle: number,
+}
+
+class State {
+  gl: GL | any;
+  animation: Animation = {
+    enabled: true,
+    handle: 0
+  };
+}
+
+const glState: State = new State();
 
 function resetRenderer() {
+  switchAnimation(glState.animation.enabled);
   const attractor = getSelectName().value;
   const canvas = getByCss('#canvas');
   disposeGL(canvas);
   glState.gl = render(canvas, attractor, document.body.clientWidth, document.body.clientHeight);
-  tick(glState)();
+  tick(glState)(0);
 }
 
-function tick(state: GLState) {
-  return () => {
+// レンダリング
+function tick(state: State) {
+  return (timestamp: number) => {
     const { renderer, scene, camera, line } = state.gl;
-    if (state.animate) { 
-      requestAnimationFrame(tick(state));
-      // 箱を回転させる
+    if (state.animation.enabled) {
+      state.animation.handle = requestAnimationFrame(tick(state));
       line.rotation.x += 0.01;
       line.rotation.y += 0.01;
     }
-    // レンダリング
     renderer.render(scene, camera);
   }
 }
 
+function cancelAnimation() {
+  if (glState.animation.handle) {
+    cancelAnimationFrame(glState.animation.handle);
+    glState.animation.handle = 0;
+  }
+}
+
+function switchAnimation(animation: boolean) {
+  cancelAnimation();
+  glState.animation.enabled = animation;
+  setDisplay(animation ? 'none' : 'block', '.play_arrow');
+  setDisplay(animation ? 'block' : 'none', '.pause');
+}
 
 function init() {
   setEvents('#done',
     ['click', _ => {
-      setDisplayElements('none', '#settings');
-      setDisplayElements('block', '#canvas', '#ope-icons');
+      setDisplay('none', '#settings');
+      setDisplay('block', '#canvas,#ope-icons i');
       resetRenderer();
     }]
   );
-  setEvents('#canvas',
+  setEvents('#canvas,#ope-icons',
     ['mousemove', _ => {
-      function hideEl() {
-        switchStyle('3s', '0', 'hidden', '-100px');
-      }
-      function switchStyle(delay: string, opacity: string, visibility: string, top: string) {
-        const opeIcons = getByCss('#ope-icons');
-        const transitionend = 'transitionend';
-        opeIcons.removeEventListener(transitionend, hideEl);
-        if (visibility = 'visible') {
-          opeIcons.addEventListener(transitionend, hideEl);
-        }
-        opeIcons.style.transitionDelay = delay;
-        opeIcons.style.opacity = opacity;
-        opeIcons.style.visibility = visibility; 
-        opeIcons.style.top = top;     
-      }
-      switchStyle('0.1s', '1', 'visible', '0');
+      getsByCss('#ope-icons i').forEach(el => {
+        el.style.animation = 'fade-in-out 3s ease 0.1s forwards';
+        el.addEventListener('animationend', _ => el.style.animation = '');
+      });
     }]
   );
   setEvents('.arrow_back',
     ['click', _ => {
-      setDisplayElements('block', '#settings');
-      setDisplayElements('none', '#canvas', '#ope-icons');
+      setDisplay('block', '#settings');
+      setDisplay('none', '#canvas,#ope-icons i');
       disposeGL(getByCss('#canvas'));
     }]
   );
@@ -105,17 +123,13 @@ function init() {
     }]);
   setEvents('.pause',
     ['click', _ => {
-      glState.animate = false;
-      setDisplayElements('none', '.pause');
-      setDisplayElements('block', '.play_arrow');
+      switchAnimation(false);
     }]
   );
   setEvents('.play_arrow',
     ['click', _ => {
-      glState.animate = true;
-      setDisplayElements('block', '.pause');
-      setDisplayElements('none', '.play_arrow');
-      tick(glState)();
+      switchAnimation(true);
+      tick(glState)(0);
     }]
   );
 

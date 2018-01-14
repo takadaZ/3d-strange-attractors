@@ -35,10 +35,6 @@ declare global {
     camera: THREE.PerspectiveCamera,
     line: THREE.Line
   }
-  interface GLState {
-    gl: GL,
-    animate: boolean
-  }
 }
 
 export function render(
@@ -90,10 +86,5 @@ export function render(
   // シーンに追加
   scene.add(light);
 
-  return {
-    renderer,
-    scene,
-    camera,
-    line
-  };
+  return { renderer, scene, camera, line };
 }
