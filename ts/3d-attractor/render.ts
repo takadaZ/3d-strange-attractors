@@ -1,7 +1,9 @@
 import { attractors } from './attractors';
 import { rK } from './runge-kutta';
 import * as R from 'ramda';
-import * as THREE from 'three';
+
+const THREELib = require('three-js');
+const THREE = THREELib(['EffectComposer', 'OrbitControls']);
 
 export function disposeGL(canvas: HTMLElement) {
   (Array.from(canvas.children) as HTMLCanvasElement[]).forEach(child => {
@@ -33,6 +35,7 @@ declare global {
     renderer: THREE.WebGLRenderer,
     scene: THREE.Scene,
     camera: THREE.PerspectiveCamera,
+    controls: THREE.OrbitControls,
     line: THREE.Line
   }
 }
@@ -63,7 +66,10 @@ export function render(
   // カメラを作成
   const camera = new THREE.PerspectiveCamera(fov, width / height, 1, 100000);
   camera.position.set(0, 0, cameraPos);
- 
+
+  const controls = new THREE.OrbitControls(camera);
+  controls.autoRotate = true;
+
   // main
   const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
   const geometry = new THREE.Geometry();
@@ -86,5 +92,5 @@ export function render(
   // シーンに追加
   scene.add(light);
 
-  return { renderer, scene, camera, line };
+  return { renderer, scene, camera, controls, line };
 }

@@ -1,8 +1,6 @@
 import { attractors } from './attractors';
 import { render, disposeGL } from './render';
-import { view, scan } from 'ramda';
-import { win32 } from 'path';
-import { AnimationAction } from 'three';
+import { Camera } from 'three';
 
 function getByCss(selector: string) {
   return document.querySelector(selector) as HTMLElement;
@@ -54,6 +52,7 @@ class State {
 const glState: State = new State();
 
 function resetRenderer() {
+  cancelAnimation();
   switchAnimation(glState.animation.enabled);
   const attractor = getSelectName().value;
   const canvas = getByCss('#canvas');
@@ -65,12 +64,10 @@ function resetRenderer() {
 // レンダリング
 function tick(state: State) {
   return (timestamp: number) => {
-    const { renderer, scene, camera, line } = state.gl;
-    if (state.animation.enabled) {
-      state.animation.handle = requestAnimationFrame(tick(state));
-      line.rotation.x += 0.01;
-      line.rotation.y += 0.01;
-    }
+    const { renderer, scene, camera, controls, line } = state.gl;
+    controls.autoRotate = state.animation.enabled;
+    controls.update();
+    state.animation.handle = requestAnimationFrame(tick(state));
     renderer.render(scene, camera);
   }
 }
@@ -83,7 +80,6 @@ function cancelAnimation() {
 }
 
 function switchAnimation(animation: boolean) {
-  cancelAnimation();
   glState.animation.enabled = animation;
   setDisplay(animation ? 'none' : 'block', '.play_arrow');
   setDisplay(animation ? 'block' : 'none', '.pause');
@@ -98,18 +94,19 @@ function init() {
     }]
   );
   setEvents('#canvas,#ope-icons',
-    ['mousemove', _ => {
-      getsByCss('#ope-icons i').forEach(el => {
-        el.style.animation = 'fade-in-out 3s ease 0.1s forwards';
-        el.addEventListener('animationend', _ => el.style.animation = '');
-      });
-    }]
+    ['mousemove', _ => getsByCss('#ope-icons i').forEach(el => el.style.animation = 'fade-in-out 3s ease 0.1s forwards')]
   );
   setEvents('.arrow_back',
     ['click', _ => {
       setDisplay('block', '#settings');
       setDisplay('none', '#canvas,#ope-icons i');
       disposeGL(getByCss('#canvas'));
+      const { renderer, scene, controls, line } = glState.gl as GL;
+      controls.dispose();
+      scene.remove(line);
+      line.geometry.dispose();
+      line.material.dispose();
+      renderer.dispose();
     }]
   );
   setEvents('.fullscreen',
@@ -122,15 +119,10 @@ function init() {
       }
     }]);
   setEvents('.pause',
-    ['click', _ => {
-      switchAnimation(false);
-    }]
+    ['click', _ => switchAnimation(false)]
   );
   setEvents('.play_arrow',
-    ['click', _ => {
-      switchAnimation(true);
-      tick(glState)(0);
-    }]
+    ['click', _ => switchAnimation(true)]
   );
 
   createSelectName();
@@ -138,3 +130,4 @@ function init() {
 
 window.addEventListener('resize', resetRenderer)
 window.addEventListener('DOMContentLoaded', init);
+getsByCss('#ope-icons i').forEach(el => el.addEventListener('animationend', _ => el.style.animation = ''));
