@@ -27,15 +27,12 @@
   word-wrap: normal;
   white-space: nowrap;
   direction: ltr;
-
   /* Support for all WebKit browsers. */
   -webkit-font-smoothing: antialiased;
   /* Support for Safari and Chrome. */
   text-rendering: optimizeLegibility;
-
   /* Support for Firefox. */
   -moz-osx-font-smoothing: grayscale;
-
   /* Support for IE. */
   font-feature-settings: 'liga';
 }
@@ -55,17 +52,22 @@ html, body {
 
 #ope-icons {
   padding: 10px;
-  width: 100%;
   position: absolute;
   top: 0;
+  visibility: hidden;
+  opacity: 0;
+}
+
+#ope-icons:hover {
+  visibility: visible;
+  opacity: 1;
 }
 
 #ope-icons i {
+  float: left;
   color: #888;
   cursor: pointer;
   font-size: 48px;
-  visibility: hidden;
-  opacity: 0;
 }
 
 #ope-icons i:hover {
@@ -74,12 +76,10 @@ html, body {
   opacity: 1;
 }
 
-.fullscreen,.play_arrow,.pause {
-  float: right;
-  display: none;
+.arrow_back {
+  margin-right: 1em;
 }
 
-.arrow_back {
-  float: left;
+.fullscreen {
   display: none;
 }

@@ -1,9 +1,12 @@
 import { attractors } from './attractors';
 import { rK } from './runge-kutta';
 import * as R from 'ramda';
+import 'three-examples/controls/OrbitControls';
+import * as three from 'three';
 
-const THREELib = require('three-js');
-const THREE = THREELib(['EffectComposer', 'OrbitControls']);
+declare global {
+  const THREE: typeof three;
+}
 
 export function disposeGL(canvas: HTMLElement) {
   (Array.from(canvas.children) as HTMLCanvasElement[]).forEach(child => {

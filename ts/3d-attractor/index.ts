@@ -1,6 +1,5 @@
 import { attractors } from './attractors';
 import { render, disposeGL } from './render';
-import { Camera } from 'three';
 
 function getByCss(selector: string) {
   return document.querySelector(selector) as HTMLElement;
@@ -42,7 +41,7 @@ interface Animation {
 }
 
 class State {
-  gl: GL | any;
+  gl: GL;
   animation: Animation = {
     enabled: true,
     handle: 0
@@ -94,19 +93,16 @@ function init() {
     }]
   );
   setEvents('#canvas,#ope-icons',
-    ['mousemove', _ => getsByCss('#ope-icons i').forEach(el => el.style.animation = 'fade-in-out 3s ease 0.1s forwards')]
+    ['mousemove', _ => getByCss('#ope-icons').style.animation = 'fade-in-out 3s ease 0.1s forwards']
   );
   setEvents('.arrow_back',
     ['click', _ => {
       setDisplay('block', '#settings');
       setDisplay('none', '#canvas,#ope-icons i');
       disposeGL(getByCss('#canvas'));
-      const { renderer, scene, controls, line } = glState.gl as GL;
-      controls.dispose();
-      scene.remove(line);
-      line.geometry.dispose();
-      line.material.dispose();
-      renderer.dispose();
+      const { renderer, scene, controls, line } = glState.gl;
+      scene.children.forEach(child => scene.remove(child));
+      [controls, line.geometry, line.material, renderer].forEach(gl => gl.dispose());
     }]
   );
   setEvents('.fullscreen',
@@ -125,9 +121,12 @@ function init() {
     ['click', _ => switchAnimation(true)]
   );
 
+  window.addEventListener('resize', resetRenderer);
+  getByCss('#ope-icons').addEventListener('animationend', ev => (ev.srcElement as HTMLElement).style.animation = '');
+  if ((el => el.webkitRequestFullScreen || (el as any).mozRequestFullScreen || el.requestFullscreen)(getByCss('#canvas'))) {
+    getByCss('.fullscreen').style.display = 'block';
+  }
   createSelectName();
 }
 
-window.addEventListener('resize', resetRenderer)
 window.addEventListener('DOMContentLoaded', init);
-getsByCss('#ope-icons i').forEach(el => el.addEventListener('animationend', _ => el.style.animation = ''));
