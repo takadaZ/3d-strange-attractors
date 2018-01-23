@@ -88,7 +88,7 @@ function init() {
   setEvents('#done',
     ['click', _ => {
       setDisplay('none', '#settings');
-      setDisplay('block', '#canvas,#ope-icons i');
+      setDisplay('block', '#canvas,#ope-icons');
       resetRenderer();
     }]
   );
@@ -98,7 +98,7 @@ function init() {
   setEvents('.arrow_back',
     ['click', _ => {
       setDisplay('block', '#settings');
-      setDisplay('none', '#canvas,#ope-icons i');
+      setDisplay('none', '#canvas,#ope-icons');
       disposeGL(getByCss('#canvas'));
       const { renderer, scene, controls, line } = glState.gl;
       scene.children.forEach(child => scene.remove(child));
@@ -107,7 +107,7 @@ function init() {
   );
   setEvents('.fullscreen',
     ['click', _ => {
-      const canvas = getByCss('#canvas') as HTMLDivElement | any;
+      const canvas = getByCss('#canvas') as any;
       if (canvas.webkitRequestFullScreen) {
         canvas.webkitRequestFullScreen();
       } else {
@@ -123,7 +123,7 @@ function init() {
 
   window.addEventListener('resize', resetRenderer);
   getByCss('#ope-icons').addEventListener('animationend', ev => (ev.srcElement as HTMLElement).style.animation = '');
-  if ((el => el.webkitRequestFullScreen || (el as any).mozRequestFullScreen || el.requestFullscreen)(getByCss('#canvas'))) {
+  if ((el => el.webkitRequestFullScreen || (el as any).mozRequestFullScreen)(getByCss('#canvas'))) {
     getByCss('.fullscreen').style.display = 'block';
   }
   createSelectName();
