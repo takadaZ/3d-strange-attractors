@@ -8,13 +8,15 @@
 </head>
 <body>
   <div id="settings">
-    <h3>3D Attractor Modeling</h3>
-    <div>
-      <label>Select attractor <select id="selectName" class="form-control"></select></label>
-    </div>
-    <div>
-      <button id="done" class="btn btn-primary">Done</button>
-    </div>
+    <h3>3D Strange Attractor</h3>
+    <form class="form-horizontal form-control" onsubmit="return false">
+      <div>
+        <label>Select attractor: <select id="selectName" class="form-control"></select></label>
+      </div>
+      <div>
+        <button type="submit" id="done" class="btn btn-primary">Done</button>
+      </div>
+    </form>
   </div>
   <div id="canvas"></div>
   <div id="ope-icons">
