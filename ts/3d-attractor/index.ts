@@ -122,7 +122,7 @@ function init() {
   );
 
   window.addEventListener('resize', resetRenderer);
-  getByCss('#ope-icons').addEventListener('animationend', ev => (ev.srcElement as HTMLElement).style.animation = '');
+  getByCss('#ope-icons').addEventListener('animationend', ev => (ev.target as HTMLElement).style.animation = '');
   if ((el => el.webkitRequestFullScreen || (el as any).mozRequestFullScreen)(getByCss('#canvas'))) {
     getByCss('.fullscreen').style.display = 'block';
   }
