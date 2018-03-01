@@ -102,7 +102,8 @@ function init() {
       disposeGL(getByCss('#canvas'));
       const { renderer, scene, controls, line } = glState.gl;
       scene.children.forEach(child => scene.remove(child));
-      [controls, line.geometry, line.material, renderer].forEach(gl => gl.dispose());
+      // [controls, line.geometry, line.material, renderer].forEach(gl => gl.dispose());
+      [controls, line.geometry, renderer].forEach(gl => gl.dispose());
     }]
   );
   setEvents('.fullscreen',

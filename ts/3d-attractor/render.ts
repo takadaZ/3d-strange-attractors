@@ -3,9 +3,11 @@ import { rK } from './runge-kutta';
 import * as R from 'ramda';
 import 'three-examples/controls/OrbitControls';
 import * as three from 'three';
+import 'three-examples/effects/CardboardEffect';
 
 declare global {
   const THREE: typeof three;
+  const BufferGeometry: typeof three.BufferGeometry;
 }
 
 export function disposeGL(canvas: HTMLElement) {
@@ -39,7 +41,7 @@ declare global {
     scene: THREE.Scene,
     camera: THREE.PerspectiveCamera,
     controls: THREE.OrbitControls,
-    line: THREE.Line
+    line: THREE.Mesh
   }
 }
 
@@ -52,6 +54,11 @@ export function render(
 ): GL {
 
   const renderer = new THREE.WebGLRenderer();
+  const effect = new THREE.CardboardEffect(renderer);
+  //初期化時とリサイズ処理内
+  effect.setSize(width, height);
+  //ループ処理内で
+  // effect.render( シーン, カメラ);
 
   // レンダラーを作成
   renderer.autoClear = true;
@@ -67,33 +74,55 @@ export function render(
   const { fov, cameraPos, initXYZ } = attractor;
 
   // カメラを作成
+  // const camera = new THREE.PerspectiveCamera( 60, canW / canH, 0.001, 2000);
   const camera = new THREE.PerspectiveCamera(fov, width / height, 1, 100000);
   camera.position.set(0, 0, cameraPos);
+
+  // camera.position.set( 0, 0, 20);
+  camera.lookAt( new THREE.Vector3() );
+  
+  //レンズの焦点距離(この値によって視差の大小が決まる?)
+  camera.focalLength = camera.position.distanceTo( new THREE.Vector3() );  
+  // camera.focalLength = 2;
 
   const controls = new THREE.OrbitControls(camera);
   controls.autoRotate = true;
 
+  const path = new THREE.CatmullRomCurve3();
   // main
-  const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
-  const geometry = new THREE.Geometry();
   R.range(0, attractor.recursion || recursion).reduce(inputXYZ => {
     const xyz = rK(inputXYZ, attractor);
     const [x, y, z] = xyz;
-    geometry.vertices.push(new THREE.Vector3(x, y, z));
+    path.points.push(new THREE.Vector3(x, y, z));
     return xyz;
   }, initXYZ);
+  const geometry = new THREE.TubeGeometry(path, 10000, 0.3, 20);
 
-  const line = new THREE.Line(geometry, material);
-  // シーンに追加
+  const material = new THREE.MeshLambertMaterial({ color: 0x0000ff });
+  const line = new THREE.Mesh( geometry, material );
   scene.add(line);
 
+  // const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+
+  // const geometry = new THREE.Geometry();
+  // R.range(0, attractor.recursion || recursion).reduce(inputXYZ => {
+  //   const xyz = rK(inputXYZ, attractor);
+  //   const [x, y, z] = xyz;
+  //   geometry.vertices.push(new THREE.Vector3(x, y, z).multiplyScalar(1));
+  //   return xyz;
+  // }, initXYZ);
+
+  // const line = new THREE.Line(geometry, material);
+  // シーンに追加
+  // scene.add(line);
+
   // 平行光源
-  const light = new THREE.DirectionalLight(0xFFFFFF);
-  light.intensity = 2; // 光の強さを倍に
-  light.position.set(1, 1, 1);
+  const light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 0.5 );
+  // light.intensity = 2; // 光の強さを倍に
+  light.position.set(1000, 1000, 1000);
 
   // シーンに追加
   scene.add(light);
 
-  return { renderer, scene, camera, controls, line };
+  return { renderer: effect, scene, camera, controls, line };
 }
