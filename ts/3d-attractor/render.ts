@@ -1,9 +1,9 @@
 import { attractors } from './attractors';
 import { rK } from './runge-kutta';
 import * as R from 'ramda';
-import 'three-examples/controls/OrbitControls';
+import 'three/examples/js/controls/OrbitControls';
 import * as three from 'three';
-import 'three-examples/effects/CardboardEffect';
+import 'three/examples/js/effects/CardboardEffect';
 
 declare global {
   const THREE: typeof three;
@@ -88,17 +88,28 @@ export function render(
   const controls = new THREE.OrbitControls(camera);
   controls.autoRotate = true;
 
-  const path = new THREE.CatmullRomCurve3();
+  // const path = new THREE.CatmullRomCurve3();
   // main
-  R.range(0, attractor.recursion || recursion).reduce(inputXYZ => {
-    const xyz = rK(inputXYZ, attractor);
-    const [x, y, z] = xyz;
-    path.points.push(new THREE.Vector3(x, y, z));
-    return xyz;
-  }, initXYZ);
+  // const vectors = R.range(0, attractor.recursion || recursion).reduce((inputXYZ: XYZ) => {
+  //   const xyz = rK(inputXYZ, attractor);
+  //   const [x, y, z] = xyz;
+  //   path.points.push(new THREE.Vector3(x, y, z));
+  //   return xyz;
+  // }, initXYZ);
+
+  const S = (f: any) => (g: any) => (x: any) => f(x)(g(x));
+  const B = (f: any) => (g: any) => (x: any) => f(g(x));
+　const rk = rK(attractor);
+
+  const attrVectors = R.range(0, attractor.recursion || recursion)
+    .reduce(S(R.flip(R.append))(B(rk)(R.last)), [initXYZ])
+    .map(([x, y, z]: XYZ) => new THREE.Vector3(x, y, z));
+
+  const path = new THREE.CatmullRomCurve3(attrVectors);
+
   const geometry = new THREE.TubeGeometry(path, 10000, 0.3, 20);
 
-  const material = new THREE.MeshLambertMaterial({ color: 0x0000ff });
+  const material = new THREE.MeshPhongMaterial({ color: 0x0000ff });
   const line = new THREE.Mesh( geometry, material );
   scene.add(line);
 

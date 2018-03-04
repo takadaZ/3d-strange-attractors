@@ -13,11 +13,11 @@
   "license": "ISC",
   "dependencies": {
     "http-server": "^0.10.0",
-    "three": "0.75.0"
+    "three": "^0.75.0"
   },
   "devDependencies": {
     "@types/gulp": "^4.0.5",
-    "@types/ramda": "github:types/npm-ramda#dist",
+    "@types/ramda": "^0.25.19",
     "@types/three": "^0.89.1",
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.2.3",
