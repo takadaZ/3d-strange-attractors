@@ -17,14 +17,14 @@ function getRKResult(diffs: XYZ[], i: number, dt: number) {
 }
 
 export function rK({ diff, dt }: IAttractor) {
-  return (xyz: XYZ) => {
-    const [x, y, z] = xyz;
+  return ({ x, y, z }: THREE.Vector3) => {
+    // const  { x, y, z } = vector3;
     const diffs = diffArgFuns.reduce((acc, fun) => {
       const [diffX, diffY, diffZ] = R.last(acc) as XYZ;
       const input = [fun(x, diffX, dt), fun(y, diffY, dt), fun(z, diffZ, dt)] as XYZ;
       return acc.concat([diff(input)]);
-    }, [xyz]);
+    }, [[x, y, z]] as XYZ[]);
 
-    return xyz.map((_, i) => getRKResult(diffs, i, dt)) as XYZ;
+    return [x, y, z].map((_, i) => getRKResult(diffs, i, dt)) as XYZ;
   }
 }

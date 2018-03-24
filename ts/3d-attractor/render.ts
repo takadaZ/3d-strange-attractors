@@ -3,7 +3,7 @@ import { rK } from './runge-kutta';
 import * as R from 'ramda';
 import 'three/examples/js/controls/OrbitControls';
 import * as three from 'three';
-import 'three/examples/js/effects/CardboardEffect';
+import 'three/examples/js/effects/StereoEffect';
 
 declare global {
   const THREE: typeof three;
@@ -41,7 +41,7 @@ declare global {
     scene: THREE.Scene,
     camera: THREE.PerspectiveCamera,
     controls: THREE.OrbitControls,
-    line: THREE.Mesh
+    line: THREE.Line
   }
 }
 
@@ -53,10 +53,12 @@ export function render(
   recursion = 50000,
 ): GL {
 
-  const renderer = new THREE.WebGLRenderer();
-  const effect = new THREE.CardboardEffect(renderer);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  // const effect = new THREE.CardboardEffect(renderer);
+  const effect = new THREE.StereoEffect(renderer);
   //初期化時とリサイズ処理内
   effect.setSize(width, height);
+  effect.setEyeSeparation(2)
   //ループ処理内で
   // effect.render( シーン, カメラ);
 
@@ -75,57 +77,46 @@ export function render(
 
   // カメラを作成
   // const camera = new THREE.PerspectiveCamera( 60, canW / canH, 0.001, 2000);
-  const camera = new THREE.PerspectiveCamera(fov, width / height, 1, 100000);
-  camera.position.set(0, 0, cameraPos);
+  const camera = new THREE.PerspectiveCamera(70, width / height, 1, 100000);
+  // camera.position.set(0, 0, cameraPos);
 
-  // camera.position.set( 0, 0, 20);
-  camera.lookAt( new THREE.Vector3() );
+  camera.position.set(0, 0, 20);
+  // camera.lookAt(scene.position);
   
   //レンズの焦点距離(この値によって視差の大小が決まる?)
-  camera.focalLength = camera.position.distanceTo( new THREE.Vector3() );  
+  // camera.setFocalLength(camera.position.distanceTo(new THREE.Vector3())); // focalLength = camera.position.distanceTo(new THREE.Vector3());  
+  // camera.setFocalLength(300);
   // camera.focalLength = 2;
 
   const controls = new THREE.OrbitControls(camera);
   controls.autoRotate = true;
 
-  // const path = new THREE.CatmullRomCurve3();
-  // main
-  // const vectors = R.range(0, attractor.recursion || recursion).reduce((inputXYZ: XYZ) => {
-  //   const xyz = rK(inputXYZ, attractor);
-  //   const [x, y, z] = xyz;
-  //   path.points.push(new THREE.Vector3(x, y, z));
-  //   return xyz;
-  // }, initXYZ);
-
-  const S = (f: any) => (g: any) => (x: any) => f(x)(g(x));
-  const B = (f: any) => (g: any) => (x: any) => f(g(x));
+  // const S = (f: any) => (g: any) => (x: any) => f(x)(g(x));
+  const geometry = new THREE.Geometry();
 　const rk = rK(attractor);
+  const getVector3 = ([x, y, z]: XYZ) => new THREE.Vector3(x, y, z);
+  const setVector3 = (vector3: THREE.Vector3) => geometry.vertices.push(vector3);
 
-  const attrVectors = R.range(0, attractor.recursion || recursion)
-    .reduce(S(R.flip(R.append))(B(rk)(R.last)), [initXYZ])
-    .map(([x, y, z]: XYZ) => new THREE.Vector3(x, y, z));
+  R.range(0, attractor.recursion || recursion)
+    .reduce(R.compose(R.tap(setVector3), getVector3, rk), getVector3(initXYZ));
+  // .reduce(S(R.flip(R.append))(R.compose(getVector3, rk, R.last)), [getVector3(initXYZ)]);
+  // .map(([x, y, z]: XYZ) => new THREE.Vector3(x, y, z));
 
-  const path = new THREE.CatmullRomCurve3(attrVectors);
+  // const path = new THREE.CatmullRomCurve3(attrVectors);
 
-  const geometry = new THREE.TubeGeometry(path, 10000, 0.3, 20);
+  // const geometry = new THREE.TubeGeometry(path, 10000, 0.3, 20);
 
-  const material = new THREE.MeshPhongMaterial({ color: 0x0000ff });
-  const line = new THREE.Mesh( geometry, material );
-  scene.add(line);
-
-  // const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
-
-  // const geometry = new THREE.Geometry();
-  // R.range(0, attractor.recursion || recursion).reduce(inputXYZ => {
-  //   const xyz = rK(inputXYZ, attractor);
-  //   const [x, y, z] = xyz;
-  //   geometry.vertices.push(new THREE.Vector3(x, y, z).multiplyScalar(1));
-  //   return xyz;
-  // }, initXYZ);
-
-  // const line = new THREE.Line(geometry, material);
-  // シーンに追加
+  // const material = new THREE.MeshPhongMaterial({ color: 0x0000ff });
+  // const line = new THREE.Mesh( geometry, material );
   // scene.add(line);
+
+  const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+
+  // geometry.vertices = attrVectors;
+
+  const line = new THREE.Line(geometry, material);
+  // シーンに追加
+  scene.add(line);
 
   // 平行光源
   const light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 0.5 );
@@ -135,5 +126,12 @@ export function render(
   // シーンに追加
   scene.add(light);
 
+  // const geometry = new THREE.BoxGeometry( 0.4, 0.4, 0.4 );
+  // const material = new THREE.MeshNormalMaterial();
+  // const mesh = new THREE.Mesh( geometry, material );
+  // mesh.position.set( 0, 0, -1 );
+
+  // scene.add( mesh );
+  
   return { renderer: effect, scene, camera, controls, line };
 }
