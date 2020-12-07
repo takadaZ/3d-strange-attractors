@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="bootstrap.min.css">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+  <div id="settings">
+    <h3>Chaos 3D</h3>
+    <form class="form-horizontal" onsubmit="return false">
+      <div>
+        <label>Select attractor: <select id="selectName" class="form-control"></select></label>
+      </div>
+      <div>
+        <button type="submit" id="done" class="btn btn-primary">Done</button>
+      </div>
+    </form>
+  </div>
+  <div id="canvas"></div>
+  <div id="ope-icons">
+    <i class="material-icons arrow_back" title="Back">arrow_back</i>
+    <i class="material-icons play_arrow" title="Auto rotate">play_arrow</i>
+    <i class="material-icons pause" title="Pause rotate">pause</i>
+    <i class="material-icons fullscreen" title="Full Screen">fullscreen</i>
+  </div>
+  <script src="bundle.js"></script>
+</body>
+</html>
